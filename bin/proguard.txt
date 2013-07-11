@@ -2,5 +2,5 @@
 -keep class com.example.nativebluetooth.BluetoothWorker { <init>(...); }
 
 # view AndroidManifest.xml #generated:22
--keep class com.irl.ndnblue.MainActivity { <init>(...); }
+-keep class org.irl.ndnblue.MainActivity { <init>(...); }
 

@@ -1,4 +1,4 @@
-/Users/Arjun/workspace/NDNBlue/gen/com/irl/ndnblue/R.java \
+/Users/Arjun/workspace/NDNBlue/gen/org/irl/ndnblue/R.java \
  : /Users/Arjun/workspace/NDNBlue/res/drawable-hdpi/ic_launcher.png \
 /Users/Arjun/workspace/NDNBlue/res/drawable-mdpi/ic_launcher.png \
 /Users/Arjun/workspace/NDNBlue/res/drawable-xhdpi/ic_launcher.png \
