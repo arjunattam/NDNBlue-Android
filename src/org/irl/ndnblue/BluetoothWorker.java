@@ -21,43 +21,39 @@ import android.util.Log;
 
 public class BluetoothWorker implements Runnable, CCNxServiceCallback, CCNInterestHandler {
 	public static final String TAG = "NDNBlue";
-	
+
 	private CCNxServiceControl _ccnxService;
 	private Context _context;
-		
+
 	private Thread _thd;
 	private CCNHandle _handle;
 	private ContentName _responseName;
 	private Handler _handler;
-	
+
 	public BluetoothWorker(Context ctx, Handler handler) {
 		_handler = handler;
 		// TODO: checks on Bluetooth
-		
+
 		this._context = ctx;
 		CCNxConfiguration.config(ctx, false);
 		_thd = new Thread(this, "BluetoothWorker");
 	}
-	
+
 	public void start() {
 		_thd.start();
 	}
-	
+
 	public void run() {
 		if (initializeCCNx()) {
-			try {
-				Log.v(TAG, "Initialize done, inside try");
-				Message msg = new Message(); msg.obj = new String("CCN Initialized");
-				_handler.sendMessage(msg);
-				
-			} catch (Exception e) {
-				Log.v(TAG, "Exception in run");
-			}
+			Log.v(TAG, "Initialize done, inside try");
+			Message msg = new Message(); msg.obj = new String("CCN Initialized");
+			_handler.sendMessage(msg);
+
 		} else {
 			Log.v(TAG, "Error in initializeCCNx()");
 		}
 	}
-	
+
 	protected boolean initializeCCNx() {
 		_ccnxService = new CCNxServiceControl(_context);
 		_ccnxService.registerCallback(this);
@@ -65,19 +61,24 @@ public class BluetoothWorker implements Runnable, CCNxServiceCallback, CCNIntere
 		_ccnxService.setRepoOption(REPO_OPTIONS.REPO_DEBUG, "WARNING");
 		return _ccnxService.startAll();
 	}
-	
+
 	public void newCCNxStatus(SERVICE_STATUS st) {
 		//TODO: implement callback to main activity
+		// Check for BT connection state
 		switch(st) {
 		case START_ALL_DONE:
 			Log.i(TAG, "CCNx Services is ready");
+			
 			break;
 		case START_ALL_ERROR:
-			Log.i(TAG, "CCNx Services are not ready");
+			Log.e(TAG, "CCNx Services are not ready");
+			break;
+		default:
+			Log.e(TAG, "Something is wrong");
 			break;
 		}
 	}
-	
+
 	public boolean handleInterest(Interest interest) {
 		// TODO
 		return false;
