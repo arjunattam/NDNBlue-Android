@@ -57,6 +57,7 @@ public class ConnectThread extends Thread {
 		} else {
 			// textToChange = "Socket is not connected";
 		}
-		// ConnectedThread btConnection = new ConnectedThread(btSocket);
+		ConnectedThread btConnection = new ConnectedThread(btSocket, _handler);
+		btConnection.start();
 	}
 }

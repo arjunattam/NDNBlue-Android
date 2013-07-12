@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 
 public class AcceptThread extends Thread {
+	public static final String TAG = "NDNBlue";
 	BluetoothAdapter btAdapter;
 	Handler _handler;
 
@@ -55,8 +56,10 @@ public class AcceptThread extends Thread {
 			msg.obj = new String("Connected");
 			_handler.sendMessage(msg);
 		} else {
-			// textToChange = "Socket is not connected";
+			msg.obj = new String("Not connected");
+			_handler.sendMessage(msg);
 		}
-		// ConnectedThread btConnection = new ConnectedThread(btSocket);
+		ConnectedThread btConnection = new ConnectedThread(btSocket, _handler);
+		btConnection.start();
 	}
 }
