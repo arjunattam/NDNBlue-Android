@@ -3,6 +3,8 @@ package org.irl.ndnblue;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.ccnx.ccn.protocol.MalformedContentNameStringException;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -32,7 +34,7 @@ public class MainActivity extends Activity {
 	private String myAddress;
 	private String otherAddress;
 
-	private String prefix = "/ndn/blue-test/";
+	private String prefix = "ccnx:/ndn/blue-test/";
 
 	// Declare graphical elements
 	TextView status;
@@ -62,6 +64,8 @@ public class MainActivity extends Activity {
 		public void handleMessage(Message msg) {
 			String text = (String)msg.obj;
 			status.setText(text);
+			msg.obj = null;
+			msg = null;
 		}
 	};
 
@@ -97,7 +101,12 @@ public class MainActivity extends Activity {
 		remoteAddress.setText(otherAddress, TextView.BufferType.EDITABLE);
 		prefixAddress.setText(prefix, TextView.BufferType.EDITABLE);
 
-		btWorker = new BluetoothWorker(getApplicationContext(), btHandler);
+		try {
+			btWorker = new BluetoothWorker(this.getApplicationContext(), btHandler, prefixAddress.getText().toString());
+		} catch (MalformedContentNameStringException e) {
+			status.setText("MalformedContentName");
+			e.printStackTrace();
+		}
 	}
 
 	@Override
