@@ -1,20 +1,15 @@
 package org.irl.ndnblue;
 
-import java.io.IOException;
-import java.util.UUID;
-
 import org.ccnx.ccn.protocol.MalformedContentNameStringException;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.Editable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -55,8 +50,10 @@ public class MainActivity extends Activity {
 	// Threads
 	private AcceptThread acceptThread = null;
 	private ConnectThread connectThread = null;
+	public ConnectedThread connectedThread;
 
 	private BluetoothWorker btWorker;
+	Context _ctx;
 
 	// Handler
 	private Handler btHandler = new Handler() {
@@ -101,6 +98,8 @@ public class MainActivity extends Activity {
 		remoteAddress.setText(otherAddress, TextView.BufferType.EDITABLE);
 		prefixAddress.setText(prefix, TextView.BufferType.EDITABLE);
 
+		_ctx = this.getApplicationContext();
+		
 		try {
 			btWorker = new BluetoothWorker(this.getApplicationContext(), btHandler, prefixAddress.getText().toString());
 		} catch (MalformedContentNameStringException e) {
@@ -115,6 +114,7 @@ public class MainActivity extends Activity {
 		super.onDestroy();
 		if (acceptThread != null) acceptThread.cancel();
 		if (connectThread != null) connectThread.cancel();
+		if (connectedThread != null) connectThread.cancel();
 	}
 
 	private void btStatus() {
@@ -150,7 +150,7 @@ public class MainActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (D) Log.v(TAG, "--- server onClick ---");
-			acceptThread = new AcceptThread(btAdapter, btHandler);
+			acceptThread = new AcceptThread(btAdapter, btHandler, prefixAddress.getText().toString(), _ctx);
 			acceptThread.start();
 			status.setText("Listening at " + myAddress);
 		}
@@ -163,7 +163,7 @@ public class MainActivity extends Activity {
 			if (D) Log.v(TAG, "--- client onClick ---");
 			otherAddress = remoteAddress.getText().toString();
 			BluetoothDevice otherDevice = btAdapter.getRemoteDevice(otherAddress);
-			connectThread = new ConnectThread(btAdapter, otherDevice, btHandler);
+			connectThread = new ConnectThread(btAdapter, otherDevice, btHandler, prefixAddress.getText().toString(), _ctx);
 			connectThread.start();
 			status.setText("Trying to connect " + otherAddress);
 		}

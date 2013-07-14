@@ -8,6 +8,7 @@ import org.ccnx.android.ccnlib.CcndWrapper.CCND_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.REPO_OPTIONS;
 import org.ccnx.ccn.CCNHandle;
 import org.ccnx.ccn.CCNInterestHandler;
+import org.ccnx.ccn.impl.CCNNetworkChannel;
 import org.ccnx.ccn.impl.CCNNetworkManager;
 import org.ccnx.ccn.protocol.ContentName;
 import org.ccnx.ccn.protocol.Interest;
@@ -67,6 +68,8 @@ public class BluetoothWorker implements Runnable, CCNxServiceCallback, CCNIntere
 			Log.v(TAG, "Handle opened");
 			_handle.registerFilter(_prefix, this);
 			_netManager = _handle.getNetworkManager();
+			CCNNetworkChannel _channel = _netManager.get_channel();
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			_handler.obtainMessage(0,0,-1, "Error opening CCNHandle").sendToTarget();
