@@ -10,11 +10,15 @@ import org.ccnx.android.ccnlib.CCNxServiceControl;
 import org.ccnx.android.ccnlib.CCNxServiceStatus.SERVICE_STATUS;
 import org.ccnx.android.ccnlib.CcndWrapper.CCND_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.REPO_OPTIONS;
+import org.ccnx.ccn.CCNContentHandler;
 import org.ccnx.ccn.CCNHandle;
 import org.ccnx.ccn.CCNInterestHandler;
 import org.ccnx.ccn.impl.CCNNetworkChannel;
 import org.ccnx.ccn.impl.CCNNetworkManager;
+import org.ccnx.ccn.impl.encoding.BinaryXMLDecoder;
+import org.ccnx.ccn.impl.encoding.XMLEncodable;
 import org.ccnx.ccn.protocol.ContentName;
+import org.ccnx.ccn.protocol.ContentObject;
 import org.ccnx.ccn.protocol.Interest;
 import org.ccnx.ccn.protocol.MalformedContentNameStringException;
 
@@ -23,12 +27,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNInterestHandler {
+public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNInterestHandler, CCNContentHandler {
 	public static final String TAG = "NDNBlue";
 	public final BluetoothSocket _socket;
 	public final InputStream mmInStream;
 	public final OutputStream mmOutStream;
-	private CCNNetworkChannel _channel;
 	private ContentName _prefix;
 	private Thread _thd;
 	private Context _ctx;
@@ -37,22 +40,6 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 	CCNHandle _handle;
 	CCNNetworkManager _netManager;
 	CCNNetworkChannel _netChannel;
-
-	public BluetoothSocket get_socket() {
-		return _socket;
-	}
-	public void set_socket() {
-
-	}
-
-
-	public CCNNetworkChannel get_channel() {
-		return _channel;
-	}
-
-	public void set_channel(CCNNetworkChannel _channel) {
-		this._channel = _channel;
-	}
 
 	Handler _handler;
 
@@ -97,16 +84,59 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 				_handle.registerFilter(_prefix, this);
 				_netManager = _handle.getNetworkManager();
 				_netChannel = _netManager.get_channel();
-				
+				Log.v(TAG, "Channel done");
+
+				BinaryXMLDecoder _decoder = new BinaryXMLDecoder();
+
+				while (true) {
+					XMLEncodable packet;
+					_decoder.beginDecoding(mmInStream);
+					packet = _decoder.getPacket(); 
+					if (packet != null) {
+						Log.v(TAG, "---- Bluetooth: Received packet");
+						Log.v(TAG, packet.toString());
+						if (packet instanceof ContentObject) {
+							Log.v(TAG, "---- Bluetooth: Decoded content object");
+							ContentObject co = (ContentObject) packet;
+							_handle.put(co);
+						}
+						if (packet instanceof Interest) {
+							Log.v(TAG, "---- Bluetooth: Decoded interest");
+							Interest interest = (Interest) packet;
+							_handle.expressInterest(interest, this);
+						}
+					}
+				}
+
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				Log.e(TAG, "Error!");
 				e.printStackTrace();
-			}
-			_netManager = _handle.getNetworkManager();
-			_netChannel = _netManager.get_channel();
+			}	        
 		}
 	}
+
+	/*
+	void ccnToBluetooth() {
+	    Thread t = new Thread(new Runnable() {
+
+	        public void run() {
+	            try {
+	                int d;
+	                while ((d = _netChannel.read()) != -1) {
+	                	Log.v(TAG, "ccn to bt working");
+	                    mmOutStream.write(d);
+	                }
+	            } catch (IOException ex) {
+	                //TODO make a callback on exception.
+	            	Log.v(TAG, "ccn to bluetooth");
+	            }
+	        }
+	    });
+	    t.setDaemon(true);
+	    t.start();
+	}
+	 */
 
 	protected boolean initializeCCNx() {
 		_ccnxService = new CCNxServiceControl(_ctx);
@@ -159,6 +189,7 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 	public void cancel() {
 		try {
 			_socket.close();
+			_handle.close();
 		} catch (IOException e) { }
 	}
 	@Override
@@ -182,8 +213,32 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 	@Override
 	public boolean handleInterest(Interest interest) {
 		// TODO Auto-generated method stub
-		Log.v(TAG, "Received interest");
+		Log.v(TAG, "---- CCN: Received interest");
 		Log.i(TAG, interest.toString());
+		try {
+			byte[] encoded = interest.encode();
+			Log.v(TAG, encoded.toString());
+			mmOutStream.write(encoded);
+		} catch (Exception e) {
+			Log.e(TAG, "Error handle interest");
+			e.printStackTrace();
+		}
 		return false;
+	}
+
+	@Override
+	public Interest handleContent(ContentObject content, Interest interest) {
+		// TODO Auto-generated method stub
+		Log.v(TAG, "---- CCN: Received content");
+		Log.i(TAG, content.toString());
+		try {
+			byte[] encoded = content.encode();
+			Log.v(TAG, encoded.toString());
+			mmOutStream.write(encoded);
+		} catch (Exception e) {
+			Log.e(TAG, "Error handle content");
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
