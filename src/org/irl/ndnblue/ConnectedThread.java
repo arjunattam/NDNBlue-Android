@@ -83,7 +83,6 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 				Log.v(TAG, "Handle opened");
 				_handle.registerFilter(_prefix, this);
 				_netManager = _handle.getNetworkManager();
-				_netChannel = _netManager.get_channel();
 				Log.v(TAG, "Channel done");
 
 				BinaryXMLDecoder _decoder = new BinaryXMLDecoder();
@@ -94,7 +93,6 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 					packet = _decoder.getPacket(); 
 					if (packet != null) {
 						Log.v(TAG, "---- Bluetooth: Received packet");
-						Log.v(TAG, packet.toString());
 						if (packet instanceof ContentObject) {
 							Log.v(TAG, "---- Bluetooth: Decoded content object");
 							ContentObject co = (ContentObject) packet;
@@ -105,6 +103,7 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 							Interest interest = (Interest) packet;
 							_handle.expressInterest(interest, this);
 						}
+						Log.v(TAG, packet.toString());
 					}
 				}
 
@@ -189,7 +188,9 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 	public void cancel() {
 		try {
 			_socket.close();
+			_handle.unregisterFilter(_prefix, this);
 			_handle.close();
+			_handle = null;
 		} catch (IOException e) { }
 	}
 	@Override

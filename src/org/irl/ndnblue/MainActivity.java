@@ -1,5 +1,7 @@
 package org.irl.ndnblue;
 
+import java.util.Set;
+
 import org.ccnx.ccn.protocol.MalformedContentNameStringException;
 
 import android.app.Activity;
@@ -32,17 +34,17 @@ public class MainActivity extends Activity {
 	private String prefix = "ccnx:/ndn/blue-test/";
 
 	// Declare graphical elements
-	TextView status;
-	Button discoverButton;
-	Button serverButton;
-	Button clientButton;
-	Button workerButton;
-	Button serviceButton;
-	EditText remoteAddress;
-	EditText prefixAddress;
+	private TextView status;
+	private Button discoverButton;
+	private Button serverButton;
+	private Button clientButton;
+	private Button workerButton;
+	private Button serviceButton;
+	private EditText remoteAddress;
+	private EditText prefixAddress;
 
 	// Declare BT adapter
-	BluetoothAdapter btAdapter;
+	private BluetoothAdapter btAdapter;
 
 	// For user to enable BT
 	private final static int REQUEST_ENABLE_BT = 1;
@@ -53,7 +55,7 @@ public class MainActivity extends Activity {
 	public ConnectedThread connectedThread;
 
 	private BluetoothWorker btWorker;
-	Context _ctx;
+	private Context _ctx;
 
 	// Handler
 	private Handler btHandler = new Handler() {
@@ -114,7 +116,7 @@ public class MainActivity extends Activity {
 		super.onDestroy();
 		if (acceptThread != null) acceptThread.cancel();
 		if (connectThread != null) connectThread.cancel();
-		if (connectedThread != null) connectThread.cancel();
+		if (connectedThread != null) connectedThread.cancel();
 	}
 
 	private void btStatus() {
@@ -135,13 +137,14 @@ public class MainActivity extends Activity {
 			}
 		}
 	}
-
+	
 	public Button.OnClickListener discoverListener
 	= new Button.OnClickListener() {
 		@Override
 		public void onClick(View view) {
 			if (D) Log.v(TAG, "--- discover onClick ---");
-			// TODO
+			Intent intent = new Intent(MainActivity.this, DiscoveryActivity.class);
+			startActivity(intent);
 		}
 	};
 

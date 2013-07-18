@@ -5,16 +5,17 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="status">Bluetooth Status</string>
-    
+
     <!-- Buttons for activity_main -->
-    
+
     <string name="discovery">Discover Devices</string>
     <string name="server">Server</string>
     <string name="client">Client</string>
     <string name="worker">Test Worker</string>
     <string name="service">Start service</string>
-    
+
     <!-- Buttons for activity_worker -->
     <string name="worker_info">Worker Info</string>
-    
+    <string name="title_activity_discovery">DiscoveryActivity</string>
+
 </resources>
