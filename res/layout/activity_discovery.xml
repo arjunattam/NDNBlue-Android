@@ -13,6 +13,6 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/discover_results" />
+        android:id="@android:id/list" />
 
 </LinearLayout>

@@ -1,13 +1,13 @@
 package org.irl.ndnblue;
 
-import java.util.Set;
-
 import org.ccnx.ccn.protocol.MalformedContentNameStringException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +15,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -82,7 +83,7 @@ public class MainActivity extends Activity {
 		serviceButton	= (Button)findViewById(R.id.service_button);
 		remoteAddress	= (EditText)findViewById(R.id.remote_address);
 		prefixAddress	= (EditText)findViewById(R.id.prefix_address);
-		
+
 		btAdapter 		= BluetoothAdapter.getDefaultAdapter();
 
 		discoverButton.setOnClickListener(discoverListener);
@@ -92,16 +93,22 @@ public class MainActivity extends Activity {
 		serviceButton.setOnClickListener(serviceListener);
 		btStatus();
 
-		// Hard-coded solution
-		myAddress = btAdapter.getAddress();
-		if (myAddress.equals(addressOne)) otherAddress = addressTwo;
-		else otherAddress = addressOne;
-		
+		Intent intent = getIntent();
+		String discovered = intent.getStringExtra("remoteAddress");
+		if (discovered != null) {
+			otherAddress = discovered;
+		} else {
+			// Hard-coded solution
+			myAddress = btAdapter.getAddress();
+			if (myAddress.equals(addressOne)) otherAddress = addressTwo;
+			else otherAddress = addressOne;
+		}
+
 		remoteAddress.setText(otherAddress, TextView.BufferType.EDITABLE);
 		prefixAddress.setText(prefix, TextView.BufferType.EDITABLE);
 
 		_ctx = this.getApplicationContext();
-		
+
 		try {
 			btWorker = new BluetoothWorker(this.getApplicationContext(), btHandler, prefixAddress.getText().toString());
 		} catch (MalformedContentNameStringException e) {
@@ -137,16 +144,69 @@ public class MainActivity extends Activity {
 			}
 		}
 	}
-	
+
 	public Button.OnClickListener discoverListener
 	= new Button.OnClickListener() {
 		@Override
 		public void onClick(View view) {
 			if (D) Log.v(TAG, "--- discover onClick ---");
+
 			Intent intent = new Intent(MainActivity.this, DiscoveryActivity.class);
 			startActivity(intent);
+
+			//dialogTest();
 		}
 	};
+
+	/*
+	private void dialogTest() {
+		AlertDialog.Builder builderSingle = new AlertDialog.Builder(
+				DialogActivity.this);
+		builderSingle.setIcon(R.drawable.ic_launcher);
+		builderSingle.setTitle("Select One Name:-");
+		final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+				DialogActivity.this,
+				android.R.layout.select_dialog_singlechoice);
+		arrayAdapter.add("Hardik");
+		arrayAdapter.add("Archit");
+		arrayAdapter.add("Jignesh");
+		arrayAdapter.add("Umang");
+		arrayAdapter.add("Gatti");
+		builderSingle.setNegativeButton("cancel",
+				new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+
+		builderSingle.setAdapter(arrayAdapter,
+				new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String strName = arrayAdapter.getItem(which);
+				AlertDialog.Builder builderInner = new AlertDialog.Builder(
+						DialogActivity.this);
+				builderInner.setMessage(strName);
+				builderInner.setTitle("Your Selected Item is");
+				builderInner.setPositiveButton("Ok",
+						new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(
+							DialogInterface dialog,
+							int which) {
+						dialog.dismiss();
+					}
+				});
+				builderInner.show();
+			}
+		});
+		builderSingle.show();
+	}
+	 */
 
 	public Button.OnClickListener serverListener
 	= new Button.OnClickListener() {
@@ -181,16 +241,16 @@ public class MainActivity extends Activity {
 			//Intent workerIntent = new Intent(_context, WorkerActivity.class);
 			//startActivity(workerIntent);
 			btWorker.start();
-			
+
 		}
 	};
-	
+
 	public Button.OnClickListener serviceListener
 	= new Button.OnClickListener() {
 		@Override
 		public void onClick(View view) {
 			if (D) Log.v(TAG, "--- service onClick ---");
-			
+
 		}
 	};
 
