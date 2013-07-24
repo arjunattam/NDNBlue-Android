@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
 	private String myAddress;
 	private String otherAddress;
 
-	private String prefix = "ccnx:/ndn/blue-test/";
+	private String prefix = "ccnx:/ndn/blue/";
 
 	// Declare graphical elements
 	private TextView status;

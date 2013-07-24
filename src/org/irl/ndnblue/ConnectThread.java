@@ -29,7 +29,7 @@ public class ConnectThread extends Thread {
 		_ctx = ctx;
 
 		try {
-			tmp = btDevice.createInsecureRfcommSocketToServiceRecord(Constants.APP_UUID);
+			tmp = btDevice.createRfcommSocketToServiceRecord(Constants.APP_UUID);
 			// tmp = btDevice.createRfcommSocketToServiceRecord(APP_UUID);
 		} catch (IOException e) { }
 		btSocket = tmp;

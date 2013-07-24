@@ -24,7 +24,7 @@ public class AcceptThread extends Thread {
 		_ctx = ctx;
 		BluetoothServerSocket tmp = null;
 		try {
-			tmp = btAdapter.listenUsingInsecureRfcommWithServiceRecord(Constants.APP_NAME, Constants.APP_UUID);
+			tmp = btAdapter.listenUsingRfcommWithServiceRecord(Constants.APP_NAME, Constants.APP_UUID);
 			// tmp = btAdapter.listenUsingRfcommWithServiceRecord(APP_NAME, APP_UUID);
 		} catch (IOException e) { }
 		btServerSocket = tmp;
