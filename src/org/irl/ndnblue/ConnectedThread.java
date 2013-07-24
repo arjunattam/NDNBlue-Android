@@ -28,18 +28,25 @@ import android.os.Handler;
 import android.util.Log;
 
 public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNInterestHandler, CCNContentHandler {
-	public static final String TAG = "NDNBlue";
+
+	// Debugging
+	private static final String TAG = "NDNBlue";
+	private boolean D = true;
+
+	// BT streams
 	public final BluetoothSocket _socket;
 	public final InputStream mmInStream;
 	public final OutputStream mmOutStream;
+	
+	// CCNx
 	private ContentName _prefix;
 	private Thread _thd;
 	private Context _ctx;
 	private CCNxServiceControl _ccnxService;
 
-	CCNHandle _handle;
-	CCNNetworkManager _netManager;
-	CCNNetworkChannel _netChannel;
+	private CCNHandle _handle;
+	private CCNNetworkManager _netManager;
+	private CCNNetworkChannel _netChannel;
 
 	Handler _handler;
 
@@ -61,7 +68,7 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 		try {
 			tmpIn = socket.getInputStream();
 			tmpOut = socket.getOutputStream();
-			Log.v(TAG, "Streams in place");
+			if (D) Log.v(TAG, "Streams in place");
 		} catch (IOException e) { }
 
 		mmInStream = tmpIn;
@@ -80,10 +87,10 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 			_handler.obtainMessage(0,0,-1, "CCN Initialized").sendToTarget();
 			try {
 				_handle = CCNHandle.open();
-				Log.v(TAG, "Handle opened");
+				if (D) Log.v(TAG, "Handle opened");
 				_handle.registerFilter(_prefix, this);
 				_netManager = _handle.getNetworkManager();
-				Log.v(TAG, "Channel done");
+				if (D) Log.v(TAG, "Channel done");
 
 				BinaryXMLDecoder _decoder = new BinaryXMLDecoder();
 
@@ -92,18 +99,18 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 					_decoder.beginDecoding(mmInStream);
 					packet = _decoder.getPacket(); 
 					if (packet != null) {
-						Log.v(TAG, "---- Bluetooth: Received packet");
+						if (D) Log.v(TAG, "---- Bluetooth: Received packet");
 						if (packet instanceof ContentObject) {
-							Log.v(TAG, "---- Bluetooth: Decoded content object");
+							if (D) Log.v(TAG, "---- Bluetooth: Decoded content object");
 							ContentObject co = (ContentObject) packet;
 							_handle.put(co);
 						}
 						if (packet instanceof Interest) {
-							Log.v(TAG, "---- Bluetooth: Decoded interest");
+							if (D) Log.v(TAG, "---- Bluetooth: Decoded interest");
 							Interest interest = (Interest) packet;
 							_handle.expressInterest(interest, this);
 						}
-						Log.v(TAG, packet.toString());
+						if (D) Log.v(TAG, packet.toString());
 					}
 				}
 
@@ -115,28 +122,6 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 		}
 	}
 
-	/*
-	void ccnToBluetooth() {
-	    Thread t = new Thread(new Runnable() {
-
-	        public void run() {
-	            try {
-	                int d;
-	                while ((d = _netChannel.read()) != -1) {
-	                	Log.v(TAG, "ccn to bt working");
-	                    mmOutStream.write(d);
-	                }
-	            } catch (IOException ex) {
-	                //TODO make a callback on exception.
-	            	Log.v(TAG, "ccn to bluetooth");
-	            }
-	        }
-	    });
-	    t.setDaemon(true);
-	    t.start();
-	}
-	 */
-
 	protected boolean initializeCCNx() {
 		_ccnxService = new CCNxServiceControl(_ctx);
 		_ccnxService.registerCallback(this);
@@ -144,38 +129,6 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 		_ccnxService.setRepoOption(REPO_OPTIONS.REPO_DEBUG, "WARNING");
 		return _ccnxService.startAll();
 	}
-
-	/*
-    public void run() {
-        byte[] buffer = new byte[1024];  // buffer store for the stream
-        int bytes; // bytes returned from read()
-
-        String hello = "Hello!!";
-        write(hello.getBytes());
-        Log.v(TAG, "Write done");
-
-        // Keep listening to the InputStream until an exception occurs
-        while (true) {
-            try {
-                // Read from the InputStream
-                bytes = mmInStream.read(buffer);
-                int MESSAGE_READ = 131;
-                Log.v(TAG, "Read");
-				// Send the obtained bytes to the UI activity
-
-                _handler.obtainMessage(MESSAGE_READ , bytes, -1, buffer)
-                        .sendToTarget();
-
-                Message msg = new Message();
-                msg.obj = new String(buffer);
-    			_handler.sendMessage(msg);
-    			Log.v(TAG, "Handler sent");
-            } catch (IOException e) {
-                break;
-            }
-        }
-    }
-	 */
 
 	/* Call this from the main activity to send data to the remote device */
 	public void write(byte[] bytes) {
@@ -195,7 +148,6 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 	}
 	@Override
 	public void newCCNxStatus(SERVICE_STATUS st) {
-		//TODO: implement callback to main activity
 		// Check for BT connection state
 		switch(st) {
 		case START_ALL_DONE:
@@ -208,20 +160,18 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 	}
 
 	public void start() {
-		// TODO Auto-generated method stub
 		_thd.run();
 	}
 	@Override
 	public boolean handleInterest(Interest interest) {
-		// TODO Auto-generated method stub
-		Log.v(TAG, "---- CCN: Received interest");
-		Log.i(TAG, interest.toString());
+		if (D) Log.v(TAG, "---- CCN: Received interest");
+		if (D) Log.i(TAG, interest.toString());
 		try {
 			byte[] encoded = interest.encode();
-			Log.v(TAG, encoded.toString());
+			if (D) Log.v(TAG, encoded.toString());
 			mmOutStream.write(encoded);
 		} catch (Exception e) {
-			Log.e(TAG, "Error handle interest");
+			if (D) Log.e(TAG, "Error handle interest");
 			e.printStackTrace();
 		}
 		return false;
@@ -229,12 +179,11 @@ public class ConnectedThread implements Runnable, CCNxServiceCallback, CCNIntere
 
 	@Override
 	public Interest handleContent(ContentObject content, Interest interest) {
-		// TODO Auto-generated method stub
-		Log.v(TAG, "---- CCN: Received content");
-		Log.i(TAG, content.toString());
+		if (D) Log.v(TAG, "---- CCN: Received content");
+		if (D) Log.i(TAG, content.toString());
 		try {
 			byte[] encoded = content.encode();
-			Log.v(TAG, encoded.toString());
+			if (D) Log.v(TAG, encoded.toString());
 			mmOutStream.write(encoded);
 		} catch (Exception e) {
 			Log.e(TAG, "Error handle content");

@@ -11,20 +11,19 @@ import android.os.Message;
 import android.util.Log;
 
 public class ConnectThread extends Thread {
-	
+
 	// Debugging
 	private static final String TAG = "NDNBlue";
 	private boolean D = true;
-	
+
+	// BT 
 	private final BluetoothSocket btSocket;
 	private final BluetoothDevice btDevice;
-	private String _prefix;
-	Context _ctx;
+	private BluetoothAdapter btAdapter;
 
-	// Declare BT adapter
-	BluetoothAdapter btAdapter;
-	
-	Handler _handler;
+	private String _prefix;
+	private Context _ctx;
+	private Handler _handler;
 
 	public ConnectThread(BluetoothAdapter adapter, BluetoothDevice otherDevice, Handler handler, String prefix, Context ctx) {
 		btAdapter = adapter;
@@ -36,8 +35,9 @@ public class ConnectThread extends Thread {
 
 		try {
 			tmp = btDevice.createRfcommSocketToServiceRecord(Constants.APP_UUID);
-			// tmp = btDevice.createRfcommSocketToServiceRecord(APP_UUID);
-		} catch (IOException e) { }
+		} catch (IOException e) { 
+			if (D) Log.v(TAG, "Cannot start RFCOMM");
+		}
 		btSocket = tmp;
 	}
 	public void run() {
@@ -45,7 +45,8 @@ public class ConnectThread extends Thread {
 		try {
 			btSocket.connect();
 		} catch (IOException e) {
-			// Unable to connect - close and get out
+			if (D) Log.v(TAG, "Unable to connect");
+			_handler.obtainMessage(0,0,-1, "Cannot connect :(").sendToTarget();
 			try {
 				btSocket.close();
 			} catch (IOException e_1) { }
@@ -63,13 +64,10 @@ public class ConnectThread extends Thread {
 	}
 
 	private void manageConnectedSocket(BluetoothSocket btSocket) {
-		Message msg = new Message();
 		if (btSocket.isConnected()) {
-			// TODO
-			msg.obj = new String("Connected");
-			_handler.sendMessage(msg);
+			_handler.obtainMessage(0,0,-1, "Not connected").sendToTarget();
 		} else {
-			// textToChange = "Socket is not connected";
+			Log.e(TAG, "Socket is not connected!");
 		}
 		ConnectedThread btConnection = new ConnectedThread(btSocket, _handler, _prefix, _ctx);
 		btConnection.start();

@@ -8,10 +8,16 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 public class AcceptThread extends Thread {
-	public static final String TAG = "NDNBlue";
-	BluetoothAdapter btAdapter;
+	// Debugging
+	private static final String TAG = "NDNBlue";
+	private boolean D = true;
+	
+	// BT
+	private BluetoothAdapter btAdapter;
+	
 	Handler _handler;
 	String _prefix;
 	Context _ctx;
@@ -25,7 +31,6 @@ public class AcceptThread extends Thread {
 		BluetoothServerSocket tmp = null;
 		try {
 			tmp = btAdapter.listenUsingRfcommWithServiceRecord(Constants.APP_NAME, Constants.APP_UUID);
-			// tmp = btAdapter.listenUsingRfcommWithServiceRecord(APP_NAME, APP_UUID);
 		} catch (IOException e) { }
 		btServerSocket = tmp;
 	}
@@ -40,6 +45,7 @@ public class AcceptThread extends Thread {
 			}
 			// If connection is accepted
 			if (btSocket != null) {
+				if (D) Log.v(TAG, "Accepted");
 				manageConnectedSocket(btSocket);
 				try {
 					btServerSocket.close();
@@ -57,12 +63,9 @@ public class AcceptThread extends Thread {
 	private void manageConnectedSocket(BluetoothSocket btSocket) {
 		Message msg = new Message();
 		if (btSocket.isConnected()) {
-			// TODO
-			msg.obj = new String("Connected");
-			_handler.sendMessage(msg);
+			_handler.obtainMessage(0,0,-1, "Connected").sendToTarget();
 		} else {
-			msg.obj = new String("Not connected");
-			_handler.sendMessage(msg);
+			_handler.obtainMessage(0,0,-1, "Not connected").sendToTarget();
 		}
 		ConnectedThread btConnection = new ConnectedThread(btSocket, _handler, _prefix, _ctx);
 		btConnection.start();

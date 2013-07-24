@@ -31,7 +31,6 @@ public class MainActivity extends Activity {
 	private final static String addressTwo = "04:FE:31:6C:59:4F";
 	private String myAddress;
 	private String otherAddress;
-
 	private String prefix = "ccnx:/ndn/blue/";
 
 	// Declare graphical elements
@@ -40,7 +39,6 @@ public class MainActivity extends Activity {
 	private Button serverButton;
 	private Button clientButton;
 	private Button workerButton;
-	private Button serviceButton;
 	private EditText remoteAddress;
 	private EditText prefixAddress;
 
@@ -81,7 +79,6 @@ public class MainActivity extends Activity {
 		serverButton 	= (Button)findViewById(R.id.server_button);
 		clientButton	= (Button)findViewById(R.id.client_button);
 		workerButton	= (Button)findViewById(R.id.worker_button);
-		serviceButton	= (Button)findViewById(R.id.service_button);
 		remoteAddress	= (EditText)findViewById(R.id.remote_address);
 		prefixAddress	= (EditText)findViewById(R.id.prefix_address);
 
@@ -91,8 +88,7 @@ public class MainActivity extends Activity {
 		serverButton.setOnClickListener(serverListener);
 		clientButton.setOnClickListener(clientListener);
 		workerButton.setOnClickListener(workerListener);
-		serviceButton.setOnClickListener(serviceListener);
-		btStatus();
+		if (!started) btStatus();
 
 		Intent intent = getIntent();
 		String discovered = intent.getStringExtra("remoteAddress");
@@ -155,11 +151,8 @@ public class MainActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (D) Log.v(TAG, "--- discover onClick ---");
-
 			Intent intent = new Intent(MainActivity.this, DiscoveryActivity.class);
 			startActivity(intent);
-
-			//dialogTest();
 		}
 	};
 
@@ -208,20 +201,7 @@ public class MainActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (D) Log.v(TAG, "--- worker onClick ---");
-
-			//Intent workerIntent = new Intent(_context, WorkerActivity.class);
-			//startActivity(workerIntent);
 			btWorker.start();
-
-		}
-	};
-
-	public Button.OnClickListener serviceListener
-	= new Button.OnClickListener() {
-		@Override
-		public void onClick(View view) {
-			if (D) Log.v(TAG, "--- service onClick ---");
-
 		}
 	};
 
