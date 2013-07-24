@@ -1,5 +1,4 @@
-NDNBlue
-=======
+# NDNBlue for Android #
 
 NDNBlue extends CCNx on Android to run on Bluetooth. Refer to the technical report for more information.
 
