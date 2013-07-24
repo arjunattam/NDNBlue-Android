@@ -53,7 +53,8 @@ public class MainActivity extends Activity {
 	// Threads
 	private AcceptThread acceptThread = null;
 	private ConnectThread connectThread = null;
-	public ConnectedThread connectedThread;
+	private ConnectedThread connectedThread;
+	private boolean started = false;
 
 	private BluetoothWorker btWorker;
 	private Context _ctx;
@@ -117,13 +118,17 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	private void cancelAll() {
+		if (acceptThread != null) acceptThread.cancel();
+		if (connectThread != null) connectThread.cancel();
+		if (connectedThread != null) connectedThread.cancel();
+		status.setText("Ready to initialize");
+	}
+
 	@Override
 	protected void onDestroy() {
 		if (D) Log.v(TAG, "--- ON DESTROY ---");
 		super.onDestroy();
-		if (acceptThread != null) acceptThread.cancel();
-		if (connectThread != null) connectThread.cancel();
-		if (connectedThread != null) connectedThread.cancel();
 	}
 
 	private void btStatus() {
@@ -163,9 +168,17 @@ public class MainActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (D) Log.v(TAG, "--- server onClick ---");
-			acceptThread = new AcceptThread(btAdapter, btHandler, prefixAddress.getText().toString(), _ctx);
-			acceptThread.start();
-			status.setText("Listening at " + myAddress);
+			if (!started) {
+				acceptThread = new AcceptThread(btAdapter, btHandler, prefixAddress.getText().toString(), _ctx);
+				acceptThread.start();
+				status.setText("Listening at " + myAddress);
+				serverButton.setText("Stop server");
+				started = true;
+			} else {
+				cancelAll();
+				serverButton.setText("Start server");
+				started = false;
+			}
 		}
 	};
 
@@ -174,11 +187,19 @@ public class MainActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (D) Log.v(TAG, "--- client onClick ---");
-			otherAddress = remoteAddress.getText().toString();
-			BluetoothDevice otherDevice = btAdapter.getRemoteDevice(otherAddress);
-			connectThread = new ConnectThread(btAdapter, otherDevice, btHandler, prefixAddress.getText().toString(), _ctx);
-			connectThread.start();
-			status.setText("Trying to connect " + otherAddress);
+			if (!started) {
+				otherAddress = remoteAddress.getText().toString();
+				BluetoothDevice otherDevice = btAdapter.getRemoteDevice(otherAddress);
+				connectThread = new ConnectThread(btAdapter, otherDevice, btHandler, prefixAddress.getText().toString(), _ctx);
+				connectThread.start();
+				status.setText("Trying to connect " + otherAddress);
+				clientButton.setText("Stop client");
+				started = true;
+			} else {
+				cancelAll();
+				clientButton.setText("Start Client");
+				started = false;
+			}
 		}
 	};
 

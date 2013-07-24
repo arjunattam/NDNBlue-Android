@@ -9,8 +9,8 @@
     <!-- Buttons for activity_main -->
 
     <string name="discovery">Discover Devices</string>
-    <string name="server">Server</string>
-    <string name="client">Client</string>
+    <string name="server">Start Server</string>
+    <string name="client">Start Client</string>
     <string name="worker">Test Worker</string>
     <string name="service">Start service</string>
 
