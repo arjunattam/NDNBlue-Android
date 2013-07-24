@@ -8,8 +8,14 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 public class ConnectThread extends Thread {
+	
+	// Debugging
+	private static final String TAG = "NDNBlue";
+	private boolean D = true;
+	
 	private final BluetoothSocket btSocket;
 	private final BluetoothDevice btDevice;
 	private String _prefix;
@@ -49,8 +55,11 @@ public class ConnectThread extends Thread {
 	}
 	public void cancel() {
 		try {
-			btSocket.close();
-		} catch (IOException e) { }
+			if (D) Log.v(TAG, "--- connectThread cancel ---");
+			// btSocket.close();
+		} catch (Exception e) {
+			if (D) Log.v(TAG, e.toString());
+		}
 	}
 
 	private void manageConnectedSocket(BluetoothSocket btSocket) {

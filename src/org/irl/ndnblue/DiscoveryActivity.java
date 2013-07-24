@@ -54,20 +54,27 @@ public class DiscoveryActivity extends ListActivity {
 	}
 
 	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		btAdapter.cancelDiscovery();
+		unregisterReceiver(mReceiver);
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.discovery, menu);
 		return true;
 	}
-	
+
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		// TODO Auto-generated method stub
 		//super.onListItemClick(l, v, position, id);
 		String selection = l.getItemAtPosition(position).toString();
 		String remoteAddress = selection.substring(selection.length() - 17);
+		btAdapter.cancelDiscovery();
 		Intent intent = new Intent(DiscoveryActivity.this, MainActivity.class);
-		unregisterReceiver(mReceiver);
 		intent.putExtra("remoteAddress", remoteAddress);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
