@@ -23,28 +23,6 @@ public class DiscoveryActivity extends ListActivity {
 	private final static boolean D = true;
 	private final static String TAG = "NDNBlue";
 
-	/*
-	String[] DayOfWeek = {"Sunday", "Monday", "Tuesday",
-			"Wednesday", "Thursday", "Friday", "Saturday"
-	};
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		//setContentView(R.layout.main);
-		setListAdapter(new ArrayAdapter<String>(this,
-				R.layout.row, R.id.weekofday, DayOfWeek));
-	}
-
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		// TODO Auto-generated method stub
-		//super.onListItemClick(l, v, position, id);
-		String selection = l.getItemAtPosition(position).toString();
-		Toast.makeText(this, selection, Toast.LENGTH_LONG).show();
-	}
-	*/
-
 	private TextView discoverStatus;
 	private ListView discoverResults;
 	private ArrayAdapter<String> discoverAdapter;
@@ -65,8 +43,6 @@ public class DiscoveryActivity extends ListActivity {
 
 		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
 		registerReceiver(mReceiver, filter); 
-
-		// TODO: Unregister receiver
 
 		btAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (btAdapter.startDiscovery())
@@ -93,6 +69,7 @@ public class DiscoveryActivity extends ListActivity {
 		Intent intent = new Intent(DiscoveryActivity.this, MainActivity.class);
 		unregisterReceiver(mReceiver);
 		intent.putExtra("remoteAddress", remoteAddress);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 	}
 
