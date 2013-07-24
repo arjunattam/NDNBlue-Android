@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
 		serverButton.setOnClickListener(serverListener);
 		clientButton.setOnClickListener(clientListener);
 		workerButton.setOnClickListener(workerListener);
-		if (!started) btStatus();
+		if (connectedThread == null && acceptThread == null) btStatus();
 
 		Intent intent = getIntent();
 		String discovered = intent.getStringExtra("remoteAddress");
@@ -167,10 +167,14 @@ public class MainActivity extends Activity {
 				status.setText("Listening at " + myAddress);
 				serverButton.setText("Stop server");
 				started = true;
+				
+				startService(new Intent(MainActivity.this, BluetoothService.class));
 			} else {
 				cancelAll();
 				serverButton.setText("Start server");
 				started = false;
+				
+				stopService(new Intent(MainActivity.this, BluetoothService.class));	
 			}
 		}
 	};
