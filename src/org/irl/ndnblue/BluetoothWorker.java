@@ -68,7 +68,7 @@ public class BluetoothWorker implements Runnable, CCNxServiceCallback, CCNIntere
 			Log.v(TAG, "Handle opened");
 			_handle.registerFilter(_prefix, this);
 			_netManager = _handle.getNetworkManager();
-			CCNNetworkChannel _channel = _netManager.get_channel();
+			
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
